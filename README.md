@@ -22,4 +22,4 @@ for example:
 
 ** make sure the all the characters are capitalized!
 
-
+to run the script, open jupyter notebook or jupyter lab inside the folder with the script and follow the input instructions.
