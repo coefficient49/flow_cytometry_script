@@ -48,7 +48,7 @@ class flowData:
         self.gatedPopulation1 = self.Data[gatedPoints]
         return self.gatedPopulation1
     
-    def fGate(self,threshhold=100.0):
+    def fGate(self,threshhold=100):
         """Gating the FITC data
         Inputs:
         threshhold      A value threshhold for the fluorescent default value is 100
@@ -70,7 +70,7 @@ class flowData:
 
 
 
-def dataCollector(sampleDataEntry,filePaths_fcs,fgate=100.0):
+def dataCollector(sampleDataEntry,filePaths_fcs):
     """auto runner for the data collections
     inputs:
     sampleDataEntry |   panda dataframe from pd.read_cvs of the sampleNames.csv
@@ -89,7 +89,7 @@ def dataCollector(sampleDataEntry,filePaths_fcs,fgate=100.0):
         file = filePaths_fcs[f]
         fD_obj = flowData(sampleDataEntry.iloc[f,:],file)
         fD_obj.cGate() # cell gates
-        fD_obj.fGate(fgate) # flouresence gate
+        fD_obj.fGate() # flouresence gate
         fileName_N = fD_obj.Cells + '_MOI_' + str(fD_obj.MOI) + '_Virus_' + fD_obj.Virus
         if fileName_0 == fileName_N:
             i+=1
@@ -99,17 +99,10 @@ def dataCollector(sampleDataEntry,filePaths_fcs,fgate=100.0):
             fileName_0 = fileName_N
             i = 1
         dataCollection[fileName] = fD_obj
-
+        geoMeans.append(fD_obj.geomean)
         percPositive.append(fD_obj.percentPos*100)
-        if np.isnan(fD_obj.geomean):
-            geoMeans.append(0.0)
-            TI.append(0.0)
-
-        else:
-            geoMeans.append(fD_obj.geomean)
-            TI.append(fD_obj.percentPos*fD_obj.geomean)
-
         date.append(fD_obj.flowData.meta['$DATE'])
+        TI.append(fD_obj.percentPos*fD_obj.geomean)
     transductionMetrics = pd.DataFrame([geoMeans,percPositive,TI,date]).transpose()
     transductionMetrics.columns=['geoMean','Percent +ve (%)','TI','flow_date']
     df1_Out = sampleDataEntry.merge(transductionMetrics,left_index=True, right_index=True)
